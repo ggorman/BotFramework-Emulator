@@ -189,7 +189,7 @@ export class AppMenuBuilder {
 
   /** Returns the template to construct a file menu that reflects updated state */
   private static getUpdatedFileMenuContent(recentBotsMenu: Menu = new Menu()): MenuOpts[] {
-    const { Azure, UI, Bot, Emulator: EmulatorCommands } = SharedConstants.Commands;
+    const { Azure, UI, Bot, Emulator: EmulatorCommands, Ngrok } = SharedConstants.Commands;
 
     // TODO - localization
     const subMenu: MenuOpts[] = [
@@ -223,6 +223,15 @@ export class AppMenuBuilder {
         },
       },
       { type: 'separator' },
+      {
+        label: 'Open Ngrok Status Viewer...',
+        click: () => {
+          AppMenuBuilder.commandService.call(Ngrok.PingTunnel).catch(err => {
+            // eslint-disable-next-line no-console
+            console.error('Error opening Ngrok Status Viewer: ', err);
+          });
+        },
+      },
     ];
 
     const activeBot = BotHelpers.getActiveBot();
