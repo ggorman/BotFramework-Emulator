@@ -106,14 +106,14 @@ export class NgrokInstance {
     }
     await this.getNgrokInspectUrl(options);
     const tunnelInfo: { url; inspectUrl } = await this.runTunnel(options);
+    this.checkTunnelStatus();
     this.intervalForHealthCheck = setInterval(() => this.boundCheckTunnelStatus(false), 60000);
     return tunnelInfo;
   }
 
-  public async checkTunnelStatus(forceCheckTunnelNow: boolean = true): Promise<void> {
+  public async checkTunnelStatus(): Promise<void> {
     dispatch(
       checkOnTunnel({
-        forceCheckTunnelNow,
         onTunnelPingSuccess: () => {
           this.ngrokEmitter.emit('onTunnelStatusPing', TunnelStatus.Active);
         },

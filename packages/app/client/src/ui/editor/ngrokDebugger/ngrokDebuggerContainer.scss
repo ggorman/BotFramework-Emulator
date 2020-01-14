@@ -7,12 +7,6 @@
     justify-content: flex-center;
   }
 
-  %common-tunnel-indicator {
-    margin-right: 3px;
-    padding: 5px;
-    color: var(--focused-list-item);
-  }
-
   h2 {
     font-weight: bold;
   }
@@ -30,37 +24,6 @@
 
     li {
       margin-bottom: 10px;
-    }
-  }
-  
-  .tunnel-health-indicator {
-    display: inline-block;
-    position: relative;
-    padding: 3px;
-    margin-right: 2px;
-    
-    &.tunnel-error {
-      &::before {
-        @extend %common-tunnel-indicator;
-        background-color: var(--error-outline);
-        content: "Error";
-      }
-    }
-
-    &.tunnel-inactive {
-      &::before {
-        @extend %common-tunnel-indicator;
-        background-color: var(--info-outline);
-        content: "Inactive";
-      }
-    }
-
-    &.tunnel-active {
-      &::before {
-        @extend %common-tunnel-indicator;
-        background-color: var(--success-bg);
-        content: "Active";
-      }
     }
   }
 

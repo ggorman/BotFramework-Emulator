@@ -34,7 +34,7 @@ import React, { useEffect, useState } from 'react';
 
 import { TunnelCheckTimeInterval, TunnelStatus } from '../../../state/actions/ngrokTunnelActions';
 
-import * as styles from './ngrokDebuggerContainer.scss';
+import * as styles from './ngrokStatusIndicator.scss';
 
 export interface NgrokTimeIntervalIndicatorProps {
   timeIntervalSinceLastPing: TunnelCheckTimeInterval;
@@ -76,11 +76,10 @@ export const NgrokStatusIndicator = (props: NgrokTimeIntervalIndicatorProps) => 
   }, [props.timeIntervalSinceLastPing]);
 
   return (
-    <>
-      <legend>Tunnel Status</legend>
+    <div className={styles.ngrokStatusIndicator}>
       <span className={[styles.tunnelHealthIndicator, statusDisplay].join(' ')}>
         <span>{displayTimeInterval}</span>
       </span>
-    </>
+    </div>
   );
 };

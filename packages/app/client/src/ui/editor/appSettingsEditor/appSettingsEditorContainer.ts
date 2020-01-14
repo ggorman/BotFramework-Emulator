@@ -48,6 +48,9 @@ import { AppSettingsEditor, AppSettingsEditorProps } from './appSettingsEditor';
 const mapStateToProps = (state: RootState, ownProps: AppSettingsEditorProps) => ({
   ...ownProps,
   framework: state.framework,
+  timeIntervalSinceLastPing: state.ngrokTunnel.timeIntervalSinceLastPing,
+  ngrokLastPingInterval: state.ngrokTunnel.lastPingedTimestamp,
+  ngrokTunnelStatus: state.ngrokTunnel.tunnelStatus,
 });
 
 const mapDispatchToProps = (dispatch: (action: Action) => void, ownProps: AppSettingsEditorProps) => ({
@@ -71,6 +74,8 @@ const mapDispatchToProps = (dispatch: (action: Action) => void, ownProps: AppSet
   },
   saveFrameworkSettings: (framework: FrameworkSettings) => dispatch(saveFrameworkSettings(framework)),
   setDirtyFlag: debounce((dirty: boolean) => dispatch(EditorActions.setDirtyFlag(ownProps.documentId, dirty)), 300),
+  onOpenNgrokStatusViewerClick: () =>
+    dispatch(executeCommand(true, SharedConstants.Commands.Ngrok.OpenStatusViewer, null)),
 });
 
 export const AppSettingsEditorContainer = connect(mapStateToProps, mapDispatchToProps)(AppSettingsEditor);

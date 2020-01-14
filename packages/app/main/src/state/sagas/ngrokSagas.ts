@@ -30,8 +30,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import { takeLatest } from 'redux-saga';
-import { select, put } from 'redux-saga/effects';
+import { takeLatest, delay } from 'redux-saga';
+import { select, put, call } from 'redux-saga/effects';
 
 import {
   NgrokTunnelActions,
@@ -42,7 +42,6 @@ import {
 } from '../actions/ngrokTunnelActions';
 import { RootState } from '../store';
 
-const getLastPingedTimestamp = (state: RootState): number => state.ngrokTunnel.lastPingedTimestamp;
 const getPublicUrl = (state: RootState): string => state.ngrokTunnel.publicUrl;
 
 const pingTunnel = async (publicUrl: string): Promise<Response | undefined> => {
@@ -59,34 +58,20 @@ const pingTunnel = async (publicUrl: string): Promise<Response | undefined> => {
   return undefined;
 };
 
-const getPingTimeInterval = (lastPingTime: number): TunnelCheckTimeInterval => {
-  const diff = new Date().getTime() - lastPingTime;
-
-  if (diff < 20000) {
-    return TunnelCheckTimeInterval.FirstInterval;
-  }
-  if (diff >= 60000) {
-    return TunnelCheckTimeInterval.Now;
-  }
-  return TunnelCheckTimeInterval.SecondInterval;
-};
-
 export class NgrokSagas {
   public static *runTunnelStatusHealthCheck(action: NgrokTunnelAction<StatusCheckOnTunnel>): IterableIterator<any> {
-    const lastPingTimestamp: number = yield select(getLastPingedTimestamp);
     const publicUrl: string = yield select(getPublicUrl);
-    const interval: TunnelCheckTimeInterval = getPingTimeInterval(lastPingTimestamp);
-    if (action.payload.forceCheckTunnelNow || interval === TunnelCheckTimeInterval.Now) {
-      const errorOnReponse = yield pingTunnel(publicUrl);
-      if (errorOnReponse) {
-        action.payload.onTunnelPingError(errorOnReponse);
-      } else {
-        action.payload.onTunnelPingSuccess();
-      }
-      yield put(setTimeIntervalSinceLastPing(TunnelCheckTimeInterval.Now));
-      return;
+    const errorOnResponse = yield pingTunnel(publicUrl);
+    if (errorOnResponse) {
+      action.payload.onTunnelPingError(errorOnResponse);
+    } else {
+      action.payload.onTunnelPingSuccess();
     }
-    yield put(setTimeIntervalSinceLastPing(interval));
+    yield put(setTimeIntervalSinceLastPing(TunnelCheckTimeInterval.Now));
+    yield call(delay, 20000);
+    yield put(setTimeIntervalSinceLastPing(TunnelCheckTimeInterval.FirstInterval));
+    yield call(delay, 20000);
+    yield put(setTimeIntervalSinceLastPing(TunnelCheckTimeInterval.SecondInterval));
   }
 }
 
