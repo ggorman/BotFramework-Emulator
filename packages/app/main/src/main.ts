@@ -254,7 +254,7 @@ class EmulatorApplication {
   };
 
   private onTunnelStatusPing = async (status: TunnelStatus) => {
-    dispatch(updateTunnelStatus(status));
+    dispatch(updateTunnelStatus({ tunnelStatus: status }));
   };
 
   private onNewTunnelConnected = async (tunnelInfo: TunnelInfo) => {

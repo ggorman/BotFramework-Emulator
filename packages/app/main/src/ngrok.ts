@@ -39,9 +39,10 @@ import { existsSync } from 'fs';
 
 import { uniqueId } from '@bfemulator/sdk-shared';
 
-import { TunnelInfo, TunnelStatus } from './state/actions/ngrokTunnelActions';
+import { TunnelInfo, TunnelStatus, checkOnTunnel } from './state/actions/ngrokTunnelActions';
 import { ensureStoragePath, writeFile, writeStream, FileWriteStream } from './utils';
 import { PostmanNgrokCollection } from './utils/postmanNgrokCollection';
+import { dispatch } from './state';
 
 /* eslint-enable typescript/no-var-requires */
 export interface NgrokOptions {
@@ -105,29 +106,30 @@ export class NgrokInstance {
     }
     await this.getNgrokInspectUrl(options);
     const tunnelInfo: { url; inspectUrl } = await this.runTunnel(options);
-    this.intervalForHealthCheck = setInterval(() => this.boundCheckTunnelStatus(tunnelInfo.url), 60000);
+    this.intervalForHealthCheck = setInterval(() => this.boundCheckTunnelStatus(false), 60000);
     return tunnelInfo;
   }
 
-  public async checkTunnelStatus(publicUrl: string): Promise<void> {
-    const response: Response = await fetch(publicUrl, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const isErrorResponse =
-      response.status === 429 || response.status === 402 || response.status === 500 || !response.headers.get('Server');
-    if (isErrorResponse) {
-      const errorMessage = await response.text();
-      this.ws.write('-- Tunnel Error Response --');
-      this.ws.write(errorMessage);
-      this.ws.write('-- End Response --');
-      this.ngrokEmitter.emit('onTunnelError', {
-        statusCode: response.status,
-        errorMessage,
-      });
-    }
-    this.ngrokEmitter.emit('onTunnelStatusPing', isErrorResponse ? TunnelStatus.Error : TunnelStatus.Active);
+  public async checkTunnelStatus(forceCheckTunnelNow: boolean = true): Promise<void> {
+    dispatch(
+      checkOnTunnel({
+        forceCheckTunnelNow,
+        onTunnelPingSuccess: () => {
+          this.ngrokEmitter.emit('onTunnelStatusPing', TunnelStatus.Active);
+        },
+        onTunnelPingError: async response => {
+          const errorMessage = await response.text();
+          this.ws.write('-- Tunnel Error Response --');
+          this.ws.write(errorMessage);
+          this.ws.write('-- End Response --');
+          this.ngrokEmitter.emit('onTunnelError', {
+            statusCode: response.status,
+            errorMessage,
+          });
+          this.ngrokEmitter.emit('onTunnelStatusPing', TunnelStatus.Error);
+        },
+      })
+    );
   }
 
   public async disconnect(url?: string) {
@@ -242,7 +244,6 @@ export class NgrokInstance {
         logPath,
       };
       this.ngrokEmitter.emit('onNewTunnelConnected', tunnelDetails);
-      this.checkTunnelStatus(publicUrl);
       this.pendingConnection = null;
       return { url: publicUrl, inspectUrl: this.inspectUrl };
     }

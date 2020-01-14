@@ -44,7 +44,6 @@ export interface NavBarProps {
   showExplorer?: (show: boolean) => void;
   navBarSelectionChanged?: (selection: string) => void;
   openEmulatorSettings?: () => void;
-  openNgrokDebuggerPanel?: () => void;
   notifications?: string[];
   explorerIsVisible?: boolean;
   botIsOpen?: boolean;
@@ -101,14 +100,6 @@ export class NavBarComponent extends React.Component<NavBarProps, NavBarState> {
           this.props.navBarSelectionChanged(selectionMap[index]);
           this.setState({ selection: selectionMap[index] });
         }
-        break;
-
-      case 3:
-        this.props.openEmulatorSettings();
-        break;
-
-      case 4:
-        this.props.openNgrokDebuggerPanel();
         break;
 
       default:

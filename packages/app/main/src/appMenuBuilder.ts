@@ -226,7 +226,7 @@ export class AppMenuBuilder {
       {
         label: 'Open Ngrok Status Viewer...',
         click: () => {
-          AppMenuBuilder.commandService.call(Ngrok.PingTunnel).catch(err => {
+          AppMenuBuilder.commandService.call(Ngrok.OpenStatusViewer).catch(err => {
             // eslint-disable-next-line no-console
             console.error('Error opening Ngrok Status Viewer: ', err);
           });

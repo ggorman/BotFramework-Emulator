@@ -38,6 +38,8 @@ import {
   TunnelError,
   TunnelStatus,
   TunnelStatusAndTimestamp,
+  TunnelInfo,
+  TunnelCheckTimeInterval,
 } from '../actions/ngrokTunnelActions';
 
 export interface NgrokTunnelState {
@@ -47,7 +49,8 @@ export interface NgrokTunnelState {
   logPath: string;
   postmanCollectionPath: string;
   tunnelStatus: TunnelStatus;
-  lastPingedTimestamp: string;
+  lastPingedTimestamp: number;
+  timeIntervalSinceLastPing: TunnelCheckTimeInterval;
 }
 
 const DEFAULT_STATE: NgrokTunnelState = {
@@ -57,7 +60,8 @@ const DEFAULT_STATE: NgrokTunnelState = {
   postmanCollectionPath: '',
   errors: {} as TunnelError,
   tunnelStatus: TunnelStatus.Inactive,
-  lastPingedTimestamp: '',
+  lastPingedTimestamp: Date.now(),
+  timeIntervalSinceLastPing: TunnelCheckTimeInterval.Now,
 };
 
 export const ngrokTunnel = (
@@ -66,9 +70,11 @@ export const ngrokTunnel = (
 ): NgrokTunnelState => {
   switch (action.type) {
     case NgrokTunnelActions.setDetails:
+      // eslint-disable-next-line no-case-declarations
+      const payload: TunnelInfo = action.payload as TunnelInfo;
       state = {
         ...state,
-        ...action.payload,
+        ...payload,
       };
       break;
 
@@ -86,6 +92,11 @@ export const ngrokTunnel = (
         lastPingedTimestamp: (action.payload as TunnelStatusAndTimestamp).timestamp,
       };
       break;
+    case NgrokTunnelActions.setTimeIntervalSinceLastPing:
+      state = {
+        ...state,
+        timeIntervalSinceLastPing: action.payload as TunnelCheckTimeInterval,
+      };
   }
   return state;
 };

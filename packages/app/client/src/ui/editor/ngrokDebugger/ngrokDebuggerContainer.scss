@@ -7,6 +7,12 @@
     justify-content: flex-center;
   }
 
+  %common-tunnel-indicator {
+    margin-right: 3px;
+    padding: 5px;
+    color: var(--focused-list-item);
+  }
+
   h2 {
     font-weight: bold;
   }
@@ -32,25 +38,27 @@
     position: relative;
     padding: 3px;
     margin-right: 2px;
-    color: var(--focused-list-item);
-
+    
     &.tunnel-error {
-      background-color: var(--error-outline);
       &::before {
+        @extend %common-tunnel-indicator;
+        background-color: var(--error-outline);
         content: "Error";
       }
     }
 
     &.tunnel-inactive {
-      background-color: var(--info-outline);
       &::before {
+        @extend %common-tunnel-indicator;
+        background-color: var(--info-outline);
         content: "Inactive";
       }
     }
 
     &.tunnel-active {
-      background-color: var(--success-bg);
       &::before {
+        @extend %common-tunnel-indicator;
+        background-color: var(--success-bg);
         content: "Active";
       }
     }
